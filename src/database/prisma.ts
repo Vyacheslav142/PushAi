@@ -1,8 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import logger from '../config/logger';
 
+const datasourceUrl = process.env.DATABASE_URL;
+
+if (!datasourceUrl) {
+  throw new Error('DATABASE_URL environment variable is not set');
+}
+
 const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
+  datasourceUrl,
   log:
     process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
 });
