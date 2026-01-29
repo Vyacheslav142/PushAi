@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import logger from '../config/logger';
 
 const prisma = new PrismaClient({
+  datasourceUrl: process.env.DATABASE_URL,
   log:
     process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
 });
