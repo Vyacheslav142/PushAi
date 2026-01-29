@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 Int                 @id @default(autoincrement())
+  telegramId         String              @unique @map("telegram_id")
+  username           String?
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  workouts           Workout[]
+  userRoomInventory  UserRoomInventory[]
+  userPoints         UserPoints?
+
+  @@map("users")
+}
+
+model Workout {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  pushupsCount Int      @map("pushups_count")
+  duration     Int
+  completedAt  DateTime @default(now()) @map("completed_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("workouts")
+  @@index([userId])
+}
+
+model RoomItem {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  priceInPoints     Int                 @map("price_in_points")
+  description       String?
+  userRoomInventory UserRoomInventory[]
+
+  @@map("room_items")
+}
+
+model UserRoomInventory {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  itemId     Int      @map("item_id")
+  quantity   Int      @default(1)
+  acquiredAt DateTime @default(now()) @map("acquired_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item       RoomItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@map("user_room_inventory")
+  @@index([userId])
+  @@index([itemId])
+}
+
+model UserPoints {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique @map("user_id")
+  totalPoints Int      @default(0) @map("total_points")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_points")
+}
