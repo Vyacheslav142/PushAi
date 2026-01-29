@@ -1,14 +1,15 @@
 import { PrismaClient } from '@prisma/client';
+import { PgAdapter } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import logger from '../config/logger';
 
-const datasourceUrl = process.env.DATABASE_URL;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
-if (!datasourceUrl) {
-  throw new Error('DATABASE_URL environment variable is not set');
-}
-
+const adapter = new PgAdapter(pool);
 const prisma = new PrismaClient({
-  datasourceUrl,
+  adapter,
   log:
     process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
 });
