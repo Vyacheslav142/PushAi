@@ -1,22 +1,31 @@
 import { PrismaClient } from '@prisma/client';
+import { PgAdapter } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import logger from '../config/logger';
 
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL is not set');
+}
+
+const pool = new Pool({ connectionString });
+const adapter = new PgAdapter(pool);
+
 const prisma = new PrismaClient({
+  adapter,
   log:
     process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
 });
 
-// Handle connection
-async function main() {
-  try {
-    await prisma.$connect();
+prisma
+  .$connect()
+  .then(() => {
     logger.info('✅ Database connected successfully');
-  } catch (error) {
+  })
+  .catch((error) => {
     logger.error('❌ Database connection failed:', error);
     process.exit(1);
-  }
-}
-
-main();
+  });
 
 export default prisma;
